@@ -7,7 +7,9 @@ class App extends Component {
   render() {
     return (
       <div>
-        <header>Bill Tracker</header>
+        <div className="jumbotron">
+          <h1 className="display-4">Monthly Bill Pay Tracker</h1>
+        </div>
         <Table />
       </div>
     );
