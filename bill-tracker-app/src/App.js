@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
-import './SpeadSheet/SpreadSheet'
-import SpeadSheet from './SpeadSheet/SpreadSheet';
+import Table from './SpeadSheet/SpreadSheet';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 class App extends Component {
   render() {
     return (
       <div>
-        <header>Bill Tracker</header>
-        <SpeadSheet />
+        <div className="jumbotron">
+          <h1 className="display-4">Monthly Bill Pay Tracker</h1>
+        </div>
+        <Table />
       </div>
     );
   }
