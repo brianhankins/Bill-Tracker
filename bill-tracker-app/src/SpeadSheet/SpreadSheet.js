@@ -7,47 +7,56 @@ import { TestData } from './TestData'
 
 let selectedRows = []
 
+
 class Table extends Component {
   constructor(props) {
     super(props);
 
-    this.lockRows = this.lockRows.bind(this)
+    this.toggleTableLock = this.toggleTableLock.bind(this)
     this.nonEditRows = this.nonEditRows.bind(this)
-    this.disableTable = this.disableTable.bind(this)
+    this.markAsPaid = this.markAsPaid.bind(this)
+    this.onRowClick = this.onRowClick.bind(this)
 
     this.state = {
-      isLocked: true
+      isLocked: true,
+      allRows: []
     }
   }
 
   componentWillMount() {
+    let tempArray = []
+
     for (var id in TestData) {
-      selectedRows.push(parseInt(id))
+      tempArray.push(parseInt(id))
     }
+
+    this.setState(prevState => ({
+      allRows: [...prevState.allRows, tempArray]
+    }))
   }
 
-  lockRows() {
-    this.setState(preState => ({ isLocked: !preState.isLocked }), () => this.disableTable())
+  toggleTableLock() {
+    this.setState(prevState => ({
+      isLocked: !prevState.isLocked
+    }))
   }
   
   nonEditRows() {
-    return this.state.isLocked ? selectedRows : []   
+    return this.state.isLocked ? this.state.allRows[0] : []   
   }
 
-  handleRowSelect(row, isSelected) {
-    isSelected ? selectedRows.push(row.id) : selectedRows = selectedRows.filter((id) => id !== row.id)
-  }
-
-  disableTable() {
-    let disabledRows = []
+  onRowClick(row, isSelected) {
+    console.log('clicked', isSelected);
 
     if (this.state.isLocked) {
-      TestData.map(row => disabledRows.push(parseInt(row.id)))
-
-      return disabledRows
+      isSelected ? selectedRows.push(row.id) : selectedRows = selectedRows.filter((id) => id !== row.id)
     }
- 
-    return disabledRows
+
+    console.log(selectedRows)
+  }
+
+  markAsPaid() {
+    
   }
 
   render() {
@@ -58,31 +67,31 @@ class Table extends Component {
     
     const selectRow = {
       mode: 'checkbox',
-      onSelect: this.handleRowSelect,
       selected: selectedRows,
-      
+      bgColor: 'red',
+      clickToSelect: true
     }
 
-    const selectRowProp = {
-      mode: 'checkbox',
-      unselectable: this.disableTable
+    const options = {
+      onRowClick: this.onRowClick
     }
-
 
     return (
       <div>
         <Button 
           bsStyle={this.state.isLocked ? 'success' : 'danger'} 
-          className='buttonPad' 
-          onClick={this.lockRows}
+          className='lockButton' 
+          onClick={this.toggleTableLock}
         >
           {this.state.isLocked ? 'UnLock' : 'Lock'}
         </Button>
-        <h6>Table is: {this.state.isLocked ? 'locked' : 'unlocked'}</h6>
+        
+        <h6>Table Status: {this.state.isLocked ? 'locked' : 'unlocked'}</h6>
+        
         <BootstrapTable data={ TestData } version='4'
-          selectRow={ selectRow  }
           cellEdit={ cellEdit }
-          selectRowProp={ selectRowProp }
+          selectRow={ selectRow }
+          options= { options }
         >
           <TableHeaderColumn dataField='id' isKey hidden>ID</TableHeaderColumn>
           <TableHeaderColumn dataField='billName'>Name</TableHeaderColumn>
@@ -91,6 +100,14 @@ class Table extends Component {
           <TableHeaderColumn dataField='totalAmountOwed'>Total Amt Owed</TableHeaderColumn>
           <TableHeaderColumn dataField='notes'>Notes</TableHeaderColumn>
         </BootstrapTable>
+        
+        <Button
+          bsStyle='info'
+          className='markAsPaidButton' 
+          onClick={this.markAsPaid}
+        >
+        Mark As Paid
+        </Button>
       </div>
     );
   }
