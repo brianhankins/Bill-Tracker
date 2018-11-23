@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import BootstrapTable from 'react-bootstrap-table-next'
 import cellEditFactory from 'react-bootstrap-table2-editor'
 import { Button } from 'react-bootstrap'
+import paidIcon from '../Images/paid-icon.jpg'
 import '../SpeadSheet/SpreadSheet.css'
-import { Columns } from './Columns'
 import { TestData } from './TestData'
 
 
@@ -16,8 +16,8 @@ class Table extends Component {
 
     this.state = {
       isLocked: true,
-      allRows: [],
       isPaid: [],
+      allRows: [],
       currentSelectedRows: []
     }
   }
@@ -39,28 +39,87 @@ class Table extends Component {
   }
 
   toggleTableLock() {
-    this.state.isLocked ?
-      this.setState(prevState => ({
-        isLocked: !prevState.isLocked,
-        allRows: []
-      }))
-      :
       this.setState(prevState => ({
         isLocked: !prevState.isLocked
-      }), () => this.updateAllRowsArr())
+      }))
   }
 
   markAsPaid() {
     console.log('Mark as paid clicked')
   }
 
+  isNonSelectable() {
+    return this.state.isLocked ? this.state.allRows[0] : []
+  }
+
+  paidImageColumn(cell, row, rowIndex, formatExtraData) {
+    return (
+      cell ? <img src={formatExtraData.paid} alt='paid icon' /> : ''
+    )
+  }
+
+  canEditData() {
+      return this.state.isLocked ? cellEditFactory({ mode: '' }) : cellEditFactory({ mode: 'click' })
+  }
+
+  updateSelectedRows(rowId, selected) {
+    if (selected) {
+      this.setState(prevState => ({
+        currentSelectedRows: [...prevState.currentSelectedRows, rowId]
+      }), () => console.log(this.state.currentSelectedRows))
+    }
+    else {
+      this.setState(prevState => ({
+        currentSelectedRows: prevState.currentSelectedRows.filter(elementId => elementId !== rowId)
+      }), () => console.log(this.state.currentSelectedRows))
+    }
+    
+    return true
+  }
 
   render() {
-    const cellEdit = cellEditFactory({
-      mode: 'click',
-      blurToSave: true,
-      nonEditableRows: this.allRows
-    });
+    const columns = 
+    [{
+      dataField: 'id',
+      text: 'id',
+      hidden: true
+    },{
+      dataField: 'billName',
+      text: 'Bill Name'
+    },{
+      dataField: 'amountDue',
+      text: 'Amount Due'
+    },{
+      dataField: 'dueDate',
+      text: 'Due Date'
+    },{
+      dataField: 'totalAmountOwed',
+      text: 'Total Amt Owed'
+    },{
+      dataField: 'notes',
+      text: 'Notes'
+    },{
+      dataField: 'isPaid',
+      text: 'Paid',
+      formatter: this.paidImageColumn,
+      formatExtraData: {
+          paid: paidIcon
+      },
+      headerStyle: { width: '4vw' },
+      editable: false
+    }]
+
+    const selectRow = {
+      mode: 'checkbox',
+      clickToEdit: true,
+      nonSelectable: this.isNonSelectable(),
+      onSelect: (row, isSelect, rowIndex, e) => {
+        return this.updateSelectedRows(row.id, isSelect)
+      },
+      onSelectAll: (isSelect, rows, e) => {
+        rows.map(row => this.updateSelectedRows(row.id, isSelect))
+      }
+    }
 
     return (
       <div>
@@ -71,21 +130,24 @@ class Table extends Component {
         >
           {this.state.isLocked ? 'UnLock' : 'Lock'}
         </Button>
-        
+
         <p>Current Table Status: {this.state.isLocked ? 'Locked' : 'Unlocked'}</p>
         
         <BootstrapTable
-          keyField='id'
+          keyField='monthYearID'
           bootstrap4={ true }
           hover={ true }
           data={ TestData }
-          columns={ Columns }
+          columns={ columns }
+          selectRow = { selectRow }
+          cellEdit={ this.canEditData() }
         />
 
         <Button
           bsStyle='info'
           className='markAsPaidButton' 
           onClick={this.markAsPaid}
+          disabled={this.state.isLocked}
         >
         Mark As Paid
         </Button>
