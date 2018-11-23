@@ -1,68 +1,97 @@
 import React, { Component } from 'react';
-import {BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import BootstrapTable from 'react-bootstrap-table-next'
+import cellEditFactory from 'react-bootstrap-table2-editor'
 import { Button } from 'react-bootstrap'
-import '../../node_modules/react-bootstrap-table/dist/react-bootstrap-table-all.min.css';
 import '../SpeadSheet/SpreadSheet.css'
+import { Columns } from './Columns'
 import { TestData } from './TestData'
+
 
 class Table extends Component {
   constructor(props) {
     super(props);
 
-    this.lockButtonText = this.lockButtonText.bind(this);
+    this.toggleTableLock = this.toggleTableLock.bind(this)
+    this.markAsPaid = this.markAsPaid.bind(this)
 
     this.state = {
       isLocked: true,
+      allRows: [],
+      isPaid: [],
+      currentSelectedRows: []
     }
   }
 
-  lockButtonText() {
-    this.setState(preState => ({
-      isLocked: !preState.isLocked
+  componentWillMount() {
+    this.updateAllRowsArr()
+  }
+
+  updateAllRowsArr() {
+    let tempArray = []
+
+    for (var id in TestData) {
+      tempArray.push(parseInt(id))
+    }
+
+    this.setState(prevState => ({
+      allRows: [...prevState.allRows, tempArray]
     }))
   }
 
-  isExpandableRow(row) {
-    return true
-  }
-  
-  expandComponent(row) {
-    return (
-      <div>Test</div>
-    );
+  toggleTableLock() {
+    this.state.isLocked ?
+      this.setState(prevState => ({
+        isLocked: !prevState.isLocked,
+        allRows: []
+      }))
+      :
+      this.setState(prevState => ({
+        isLocked: !prevState.isLocked
+      }), () => this.updateAllRowsArr())
   }
 
+  markAsPaid() {
+    console.log('Mark as paid clicked')
+  }
+
+
   render() {
+    const cellEdit = cellEditFactory({
+      mode: 'click',
+      blurToSave: true,
+      nonEditableRows: this.allRows
+    });
+
     return (
       <div>
         <Button 
-          bsStyle={this.state.isLocked ? 'danger' : 'success'} 
-          className='buttonPad' 
-          onClick={this.lockButtonText}
+          bsStyle={this.state.isLocked ? 'success' : 'danger'} 
+          className='lockButton' 
+          onClick={this.toggleTableLock}
         >
-          {this.state.isLocked ? 'Lock' : 'Unlock'}
+          {this.state.isLocked ? 'UnLock' : 'Lock'}
         </Button>
+        
+        <p>Current Table Status: {this.state.isLocked ? 'Locked' : 'Unlocked'}</p>
+        
+        <BootstrapTable
+          keyField='id'
+          bootstrap4={ true }
+          hover={ true }
+          data={ TestData }
+          columns={ Columns }
+        />
 
-        <BootstrapTable data={ TestData } version='4'
-          expandableRow={ this.isExpandableRow }
-          expandComponent={ this.expandComponent }
-          selectRow={ selectRowProp }
+        <Button
+          bsStyle='info'
+          className='markAsPaidButton' 
+          onClick={this.markAsPaid}
         >
-          <TableHeaderColumn dataField='id' isKey hidden>ID</TableHeaderColumn>
-          <TableHeaderColumn dataField='billName'>Name</TableHeaderColumn>
-          <TableHeaderColumn dataField='amountDue'>Amount Due</TableHeaderColumn>
-          <TableHeaderColumn dataField='dueDate'>Due Date</TableHeaderColumn>
-          <TableHeaderColumn dataField='totalAmountOwed'>Total Amt Owed</TableHeaderColumn>
-          <TableHeaderColumn dataField='notes'>Notes</TableHeaderColumn>
-        </BootstrapTable>
+        Mark As Paid
+        </Button>
       </div>
     );
   }
-}
-
-const selectRowProp = {
-  mode: 'checkbox',
-  bgColor: 'rgb(135, 198, 47)'
 }
 
 export default Table;
