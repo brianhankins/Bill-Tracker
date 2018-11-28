@@ -23,10 +23,10 @@ class Table extends Component {
   }
 
   componentWillMount() {
-    this.updateAllRowsArr()
+    this.updateAllRowsState()
   }
 
-  updateAllRowsArr() {
+  updateAllRowsState() {
     let tempArray = []
 
     for (var id in TestData) {
