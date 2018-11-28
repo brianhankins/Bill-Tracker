@@ -29,13 +29,11 @@ class Table extends Component {
   updateAllRowsArr() {
     let tempArray = []
 
-    for (var id in TestData) {
-      tempArray.push(parseInt(id))
-    }
+    TestData.map(obj => (tempArray.push(parseInt(obj.id))))
 
     this.setState(prevState => ({
       allRows: [...prevState.allRows, tempArray]
-    }))
+    }), () => console.log('AllRows: ', this.state.allRows))
   }
 
   toggleTableLock() {
@@ -66,12 +64,12 @@ class Table extends Component {
     if (selected) {
       this.setState(prevState => ({
         currentSelectedRows: [...prevState.currentSelectedRows, rowId]
-      }), () => console.log(this.state.currentSelectedRows))
+      }), () => console.log('Selected-CurrentSelectedRows: ', this.state.currentSelectedRows))
     }
     else {
       this.setState(prevState => ({
         currentSelectedRows: prevState.currentSelectedRows.filter(elementId => elementId !== rowId)
-      }), () => console.log(this.state.currentSelectedRows))
+      }), () => console.log('Not Selected-CurrentSelectedRows: ', this.state.currentSelectedRows))
     }
     
     return true
@@ -134,7 +132,7 @@ class Table extends Component {
         <p>Current Table Status: {this.state.isLocked ? 'Locked' : 'Unlocked'}</p>
         
         <BootstrapTable
-          keyField='monthYearID'
+          keyField='id'
           bootstrap4={ true }
           hover={ true }
           data={ TestData }
